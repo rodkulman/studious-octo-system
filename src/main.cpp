@@ -118,7 +118,34 @@ void PrintCityConnections(int cityAmount, std::vector<std::vector<bool>> &cityCo
     }
 }
 
-std::mt19937 generateRandom() {
+void GetMaxConnectionCity(int cityAmount, std::vector<std::vector<bool>> &cityConnections)
+{
+    std::vector<int> cityConnectionCount(cityAmount, 0);
+    int cityMax = 0;
+
+    for (int i = 0; i < cityAmount; i++)
+    {
+        for (int j = 0; j < cityAmount; j++)
+        {
+            if (cityConnections[i][j])
+            {
+                cityConnectionCount[i]++;
+            }
+        }
+
+        // check if the current city has more connections than the current max
+        // first time, i == cityMax, so it will always be false
+        if (cityConnectionCount[i] > cityConnectionCount[cityMax])
+        {
+            cityMax = i;
+        }        
+    }
+    
+    std::cout << "Cidade " << cityMax + 1 << " tem a maior quantidade de conexões (" << cityConnectionCount[cityMax] << ")" << std::endl;
+}
+
+void MakeCityConnections(int cityAmount, std::vector<std::vector<bool>> &cityConnections)
+{
     int seed = readIntOptional("Digite a seed para gerar as conexões (ou vazio para aleatório): ", 0);
 
     if (seed == 0) {
@@ -128,9 +155,15 @@ std::mt19937 generateRandom() {
         std::cout << "Seed gerada: " << seed << std::endl;
     }
 
-    std::mt19937 retVal(seed);
+    std::mt19937 rnd(seed);
 
-    return retVal;
+    for (int i = 0; i < cityAmount; i++)
+    {
+        for (int j = 0; j < cityAmount; j++)
+        {
+            cityConnections[i][j] = i == j ? CITY_CONSIDERS_ITSELF : rnd() % 2 == 0;
+        }
+    }
 }
 
 int main() {
@@ -139,26 +172,12 @@ int main() {
     std::wcin.imbue(std::locale());
     std::wcout.imbue(std::locale());
 
-    std::mt19937 rnd = generateRandom();
-
     int cityAmount = readIntRange("Digite o número de cidades (1 - 10): ", 1, 10);
 
     std::vector<std::vector<bool>> cityConnections(cityAmount, std::vector<bool>(cityAmount, false));
 
-    for (int i = 0; i < cityAmount; i++) {
-        std::cout << "[";
-
-        for (int j = 0; j < cityAmount; j++) {
-            cityConnections[i][j] = i == j ? CITY_CONSIDERS_ITSELF : rnd() % 2 == 0;
-
-            std::cout << cityConnections[i][j];
-            if (j < cityAmount - 1) {
-                std::cout << ", ";
-            }
-        }
-
-        std::cout << "]" << std::endl;
-    }
+    MakeCityConnections(cityAmount, cityConnections);
+    PrintCityConnections(cityAmount, cityConnections);
 
     bool running = true;
     while (running)
@@ -177,11 +196,15 @@ int main() {
         else if (input == "count") {
             CountCityInOut(cityAmount, cityConnections);
         }
+        else if (input == "max") {
+            GetMaxConnectionCity(cityAmount, cityConnections);
+        }
         else {
             std::cout << "Comandos disponíveis: " << std::endl;
 
             std::cout << "\tprint: mostra a matrix de cidades" << std::endl;
             std::cout << "\tcheck: verifica as conexões de entrada e saída uma cidade" << std::endl;
+            std::cout << "\tmax: mostra a cidade com mais conexões" << std::endl;
             std::cout << "\texit: termina o aplicativo" << std::endl;
         }
     }
