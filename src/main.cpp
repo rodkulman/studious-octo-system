@@ -352,6 +352,28 @@ void CheckForLockedCities(int cityAmount, std::vector<std::vector<bool>> &cityCo
     std::cout << std::endl;
 }
 
+void CheckItinerary(int cityAmount, std::vector<std::vector<bool>> &cityConnections)
+{
+    int iteneraryLength = readIntRange("Digite o número de cidades no itinerário (2 - 20): ", 2, 20);
+    std::vector<int> itinerary(iteneraryLength, 0);
+
+    for (int i = 0; i < iteneraryLength; i++)
+    {
+        itinerary[i] = readIntRange("Digite o número da cidade " + std::to_string(i + 1) + " (1 - " + std::to_string(cityAmount) + "): ", 1, cityAmount) - 1;
+    }
+    
+    for (int i = 0; i < iteneraryLength - 1; i++)
+    {
+        if (!cityConnections[itinerary[i]][itinerary[i + 1]])
+        {
+            std::cout << "Itinerário inválido: não é possível ir da cidade " << itinerary[i] + 1 << " para a cidade " << itinerary[i + 1] + 1 << std::endl;
+            return;
+        }
+    }
+
+    std::cout << "Itinerário válido!" << std::endl;
+}
+
 int main()
 {
     // ensure input and output are treated as UTF-8
@@ -409,6 +431,10 @@ int main()
         {
             CheckForLockedCities(cityAmount, cityConnections);
         }
+        else if (input == "itinerary")
+        {
+            CheckItinerary(cityAmount, cityConnections);
+        }
         else
         {
             std::cout << "Comandos disponíveis: " << std::endl;
@@ -420,6 +446,7 @@ int main()
             std::cout << "\tboth: verifica se uma cidade tem conexões em ambas as direções com todas as outras cidades" << std::endl;
             std::cout << "\tarrive: mostra as cidades que tem saída para uma cidade" << std::endl;
             std::cout << "\tlock: mostra as cidades que não tem conexões com nenhuma outra cidade" << std::endl;
+            std::cout << "\titinerary: verifica se um itinerário é válido" << std::endl;
             std::cout << "\texit: termina o aplicativo" << std::endl;
         }
     }
