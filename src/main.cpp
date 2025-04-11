@@ -244,6 +244,114 @@ void GetAllArriveToCity(int cityAmount, std::vector<std::vector<bool>> &cityConn
     std::cout << std::endl;
 }
 
+void CheckForLockedCities(int cityAmount, std::vector<std::vector<bool>> &cityConnections)
+{
+    std::vector<int> lockedCities(0);
+    std::vector<int> onlyInCities(0);
+    std::vector<int> onlyOutCities(0);
+
+    for (int city = 0; city < cityAmount; city++)
+    {
+        // first, check if the city has any entries
+        bool hasEntry = false;
+        for (int i = 0; i < cityAmount; i++)
+        {
+            if (i == city)
+                continue;
+
+            if (cityConnections[i][city])
+            {
+                hasEntry = true;
+                break;
+            }
+        }
+
+        // secondly, check if the city has any exits
+        bool hasExit = false;
+        for (int j = 0; j < cityAmount; j++)
+        {
+            if (city == j)
+                continue;
+
+            if (cityConnections[city][j])
+            {
+                hasExit = true;
+                break;
+            }
+        }
+
+        // if the city has no entries and no exits, it is a locked city
+        if (!hasEntry && !hasExit)
+        {
+            lockedCities.push_back(city + 1);
+        }
+        // if the city has no entries and has exits, it is an only out city
+        else if (!hasEntry && hasExit)
+        {
+            onlyOutCities.push_back(city + 1);
+        }
+        // finally, if the city has entries and no exits, it is an only in city
+        else if (hasEntry && !hasExit)
+        {
+            onlyInCities.push_back(city + 1);
+        }
+    }
+
+    std::cout << "Cidades que não tem conexões com nenhuma outra cidade: ";
+    if (lockedCities.size() == 0)
+    {
+        std::cout << "nenhuma";
+    }
+    else
+    {
+        for (int i = 0; i < lockedCities.size(); i++)
+        {
+            std::cout << lockedCities[i];
+            if (i < lockedCities.size() - 1)
+            {
+                std::cout << ", ";
+            }
+        }
+    }
+    std::cout << std::endl;
+
+    std::cout << "Cidades que só tem conexões de entrada: ";
+    if (onlyInCities.size() == 0)
+    {
+        std::cout << "nenhuma";
+    }
+    else
+    {
+        for (int i = 0; i < onlyInCities.size(); i++)
+        {
+            std::cout << onlyInCities[i];
+            if (i < onlyInCities.size() - 1)
+            {
+                std::cout << ", ";
+            }
+        }
+    }
+    std::cout << std::endl;
+
+    std::cout << "Cidades que só tem conexões de saída: ";
+    if (onlyOutCities.size() == 0)
+    {
+        std::cout << "nenhuma";
+    }
+    else
+    {
+        for (int i = 0; i < onlyOutCities.size(); i++)
+        {
+            std::cout << onlyOutCities[i];
+            if (i < onlyOutCities.size() - 1)
+            {
+                std::cout << ", ";
+            }
+        }
+    }
+    std::cout << std::endl;
+}
+
 int main()
 {
     // ensure input and output are treated as UTF-8
@@ -296,6 +404,10 @@ int main()
         else if (input == "arrive")
         {
             GetAllArriveToCity(cityAmount, cityConnections);
+        }
+        else if (input == "lock")
+        {
+            CheckForLockedCities(cityAmount, cityConnections);
         }
         else
         {
