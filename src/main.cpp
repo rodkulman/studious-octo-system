@@ -97,34 +97,9 @@ void MakeCityConnections(int cityAmount, std::vector<std::vector<bool>> &cityCon
     {
         for (int j = 0; j < cityAmount; j++)
         {
-            cityConnections[i][j] = i == j ? CITY_CONSIDERS_ITSELF : rnd() % 2 == 0;
+            cityConnections[i][j] = i == j ? true : rnd() % 2 == 0;
         }
     }
-}
-
-void CountCityInOut(int cityAmount, std::vector<std::vector<bool>> &cityConnections)
-{
-    int city = readIntRange("Digite o número da cidade (1 - " + std::to_string(cityAmount) + "): ", 1, cityAmount) - 1;
-
-    int countOut = 0;
-    for (int j = 0; j < cityAmount; j++)
-    {
-        if (cityConnections[city][j])
-        {
-            countOut++;
-        }
-    }
-
-    int countIn = 0;
-    for (int i = 0; i < cityAmount; i++)
-    {
-        if (cityConnections[i][city])
-        {
-            countIn++;
-        }
-    }
-
-    std::cout << "Cidade " << city + 1 << " tem " << countOut << " conexões de saída e " << countIn << " conexões de entrada." << std::endl;
 }
 
 void PrintCityConnections(int cityAmount, std::vector<std::vector<bool>> &cityConnections)
@@ -146,6 +121,37 @@ void PrintCityConnections(int cityAmount, std::vector<std::vector<bool>> &cityCo
     }
 }
 
+void CountCityInOut(int cityAmount, std::vector<std::vector<bool>> &cityConnections)
+{
+    int city = readIntRange("Digite o número da cidade (1 - " + std::to_string(cityAmount) + "): ", 1, cityAmount) - 1;
+
+    int countOut = 0;
+    for (int j = 0; j < cityAmount; j++)
+    {
+        if (!CITY_CONSIDERS_ITSELF && j == city)
+            continue;
+
+        if (cityConnections[city][j])
+        {
+            countOut++;
+        }
+    }
+
+    int countIn = 0;
+    for (int i = 0; i < cityAmount; i++)
+    {
+        if (!CITY_CONSIDERS_ITSELF && i == city)
+            continue;
+
+        if (cityConnections[i][city])
+        {
+            countIn++;
+        }
+    }
+
+    std::cout << "Cidade " << city + 1 << " tem " << countOut << " conexões de saída e " << countIn << " conexões de entrada." << std::endl;
+}
+
 void GetMaxConnectionCity(int cityAmount, std::vector<std::vector<bool>> &cityConnections)
 {
     std::vector<int> cityConnectionCount(cityAmount, 0);
@@ -155,6 +161,9 @@ void GetMaxConnectionCity(int cityAmount, std::vector<std::vector<bool>> &cityCo
     {
         for (int j = 0; j < cityAmount; j++)
         {
+            if (!CITY_CONSIDERS_ITSELF && i == j)
+                continue;
+
             if (cityConnections[i][j])
             {
                 cityConnectionCount[i]++;
@@ -179,11 +188,10 @@ void CheckIfAllConnectionsBothWays(int cityAmount, std::vector<std::vector<bool>
 
     for (int i = 0; i < cityAmount; i++)
     {
-        // skip the city itself
+        // in this case, the city is not considered a connection to itself
+        // so we ignore the constant CITY_CONSIDERS_ITSELF
         if (i == city)
-        {
             continue;
-        }
 
         if (!cityConnections[city][i] || !cityConnections[i][city])
         {
@@ -200,6 +208,40 @@ void CheckIfAllConnectionsBothWays(int cityAmount, std::vector<std::vector<bool>
     {
         std::cout << "Cidade " << city + 1 << " não tem conexões em ambas as direções com todas as outras cidades." << std::endl;
     }
+}
+
+void GetAllArriveToCity(int cityAmount, std::vector<std::vector<bool>> &cityConnections)
+{
+    int city = readIntRange("Digite o número da cidade (1 - " + std::to_string(cityAmount) + "): ", 1, cityAmount) - 1;
+
+    std::cout << "Cidades que tem saída para a cidade " << city + 1 << ": ";
+
+    bool foundFirst = false;
+    for (int i = 0; i < cityAmount; i++)
+    {
+        if (!CITY_CONSIDERS_ITSELF && i == city)
+            continue;
+
+        if (cityConnections[i][city])
+        {
+            if (foundFirst)
+            {
+                std::cout << ", ";
+            }
+            else
+            {
+                foundFirst = true;
+            }
+            std::cout << i + 1;
+        }
+    }
+
+    if (!foundFirst)
+    {
+        std::cout << "nenhuma";
+    }
+
+    std::cout << std::endl;
 }
 
 int main()
@@ -251,6 +293,10 @@ int main()
         {
             CheckIfAllConnectionsBothWays(cityAmount, cityConnections);
         }
+        else if (input == "arrive")
+        {
+            GetAllArriveToCity(cityAmount, cityConnections);
+        }
         else
         {
             std::cout << "Comandos disponíveis: " << std::endl;
@@ -260,6 +306,7 @@ int main()
             std::cout << "\tcount: conta as conexões de entrada e saída de uma cidade" << std::endl;
             std::cout << "\tmax: mostra a cidade com mais conexões" << std::endl;
             std::cout << "\tboth: verifica se uma cidade tem conexões em ambas as direções com todas as outras cidades" << std::endl;
+            std::cout << "\tarrive: mostra as cidades que tem saída para uma cidade" << std::endl;
             std::cout << "\texit: termina o aplicativo" << std::endl;
         }
     }
