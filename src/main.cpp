@@ -419,6 +419,7 @@ int main()
             std::cout << "\tmax: mostra a cidade com mais conexões" << std::endl;
             std::cout << "\tboth: verifica se uma cidade tem conexões em ambas as direções com todas as outras cidades" << std::endl;
             std::cout << "\tarrive: mostra as cidades que tem saída para uma cidade" << std::endl;
+            std::cout << "\tlock: mostra as cidades que não tem conexões com nenhuma outra cidade" << std::endl;
             std::cout << "\texit: termina o aplicativo" << std::endl;
         }
     }
