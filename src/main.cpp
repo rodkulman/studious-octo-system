@@ -361,7 +361,7 @@ void CheckItinerary(int cityAmount, std::vector<std::vector<bool>> &cityConnecti
     {
         itinerary[i] = readIntRange("Digite o número da cidade " + std::to_string(i + 1) + " (1 - " + std::to_string(cityAmount) + "): ", 1, cityAmount) - 1;
     }
-    
+
     for (int i = 0; i < iteneraryLength - 1; i++)
     {
         if (!cityConnections[itinerary[i]][itinerary[i + 1]])
@@ -372,6 +372,66 @@ void CheckItinerary(int cityAmount, std::vector<std::vector<bool>> &cityConnecti
     }
 
     std::cout << "Itinerário válido!" << std::endl;
+}
+
+bool HasRouteTo(std::vector<int> &cityStack, int city, int targetCity, int cityAmount, std::vector<std::vector<bool>> &cityConnections)
+{
+    if (cityConnections[city][targetCity])
+    {
+        return true;
+    }
+
+    for (int i = 0; i < cityStack.size(); i++)
+    {
+        if (cityStack[i] == city)
+        {
+            return false;
+        }
+    }
+
+    cityStack.push_back(city);
+
+    for (int i = 0; i < cityAmount; i++)
+    {
+        if (city == i)
+            continue;
+
+        if (cityConnections[city][i])
+        {
+            if (i == targetCity)
+            {
+                return true;
+            }
+            else if (HasRouteTo(cityStack, i, targetCity, cityAmount, cityConnections))
+            {
+                return true;
+            }
+        }
+    }
+
+    cityStack.pop_back();
+
+    return false;
+}
+
+void CheckRoute(int cityAmount, std::vector<std::vector<bool>> &cityConnections)
+{
+    int city1 = readIntRange("Digite o número da cidade inicial (1 - " + std::to_string(cityAmount) + "): ", 1, cityAmount) - 1;
+    int city2 = readIntRange("Digite o número da cidade final (1 - " + std::to_string(cityAmount) + "): ", 1, cityAmount) - 1;
+
+    std::vector<int> cityStack(0);
+
+    // fast check
+    if (HasRouteTo(cityStack, city1, city2, cityAmount, cityConnections))
+    {
+        std::cout << "É possível ir da cidade " << city1 + 1 << " para a cidade " << city2 + 1 << std::endl;
+        return;
+    }
+    else 
+    {
+        std::cout << "Não é possível ir da cidade " << city1 + 1 << " para a cidade " << city2 + 1 << std::endl;
+        return;
+    }
 }
 
 int main()
@@ -435,6 +495,10 @@ int main()
         {
             CheckItinerary(cityAmount, cityConnections);
         }
+        else if (input == "route")
+        {
+            CheckRoute(cityAmount, cityConnections);
+        }
         else
         {
             std::cout << "Comandos disponíveis: " << std::endl;
@@ -447,6 +511,7 @@ int main()
             std::cout << "\tarrive: mostra as cidades que tem saída para uma cidade" << std::endl;
             std::cout << "\tlock: mostra as cidades que não tem conexões com nenhuma outra cidade" << std::endl;
             std::cout << "\titinerary: verifica se um itinerário é válido" << std::endl;
+            std::cout << "\troute: verifica se é possível ir de uma cidade para outra" << std::endl;
             std::cout << "\texit: termina o aplicativo" << std::endl;
         }
     }
